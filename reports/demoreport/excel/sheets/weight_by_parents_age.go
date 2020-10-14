@@ -1,126 +1,121 @@
 package sheets
 
 // import (
-// 	"strconv"
 // 	"time"
 
-// 	"example.com/emailreports/reports/demoreport/schema"
-// 	sharedColumns "example.com/emailreports/reports/shared/excel/columns"
+// 	"example.com/emailreports/reports/demoreport/excel/columns"
 // 	sharedSchema "example.com/emailreports/reports/shared/schema"
 // 	sharedUtils "example.com/emailreports/reports/shared/utils"
 // 	"example.com/emailreports/utils"
-// 	"example.com/emailreports/utils/disneycalendar"
 // 	"github.com/JigneshSatam/parallel"
 // )
 
-// // SummaryColumnFetchers current month column fetchers
-// var SummaryColumnFetchers = sharedSchema.ColumnFetcher{
-// 	sharedUtils.Weight:                sharedSchema.RevenueEntriesFetch{},
+// // RaceWiseColumnFetchers current month column fetchers
+// var RaceWiseColumnFetchers = sharedSchema.ColumnFetcher{
+// 	sharedUtils.AvgWeightolumn: sharedSchema.EntriesFetch{},
 // }
 
 // type colDataCollector struct {
-// 	col        sharedUtils.Column
-// 	qp         sharedSchema.QueryParameter
+// 	col sharedUtils.Column
+// 	qp  sharedSchema.QueryParameter
 // }
 
 // type executeOutput struct {
-// 	result []sharedSchema.RevenueEntries
-// 	schema sharedSchema.RevenueEntryAttribute
+// 	result sharedSchema.Entries
+// 	schema sharedSchema.EntryAttribute
 // }
 
 // func (e colDataCollector) Execute() interface{} {
-// 	result := []sharedSchema.RevenueEntries{}
+// 	result := sharedSchema.Entries{}
 // 	response := executeOutput{}
+// 	schema := sharedSchema.Weight
 // 	qp := e.qp
 // 	switch e.col {
-// 	case sharedUtils.Weight:
+// 	case sharedUtils.AvgWeightolumn:
 // 		result = columns.Weight(qp)
-// 		response = executeOutput{result: result, schema: sharedSchema.Revenue}
+// 		response = executeOutput{result: result, schema: schema}
 // 	}
 // 	return response
 // }
 
 // // GetRaceWiseWeight returns race by weight of child sheet
-// func GetRaceWiseWeight(bqDatesMap disneycalendar.BQDatesMap, mnth utils.Month, yr utils.Year, date time.Time, wks []int, sheetChan chan sharedSchema.Sheet, totalRowName string, sheetColumns sharedSchema.ColumnFetcher, filters sharedSchema.FilterClauses) {
+// func GetRaceWiseWeight(date time.Time, sheetChan chan sharedSchema.Sheet, totalRowName string, sheetColumns sharedSchema.ColumnFetcher, filters sharedSchema.FilterClauses) {
 // 	qp := sharedSchema.QueryParameter{
 // 		ReportDate:    date,
 // 		FilterClauses: filters,
+// 		Type:          sharedSchema.WeightQueryType,
 // 		Selections: sharedSchema.Selections{
 // 			sharedSchema.RaceSelection,
+// 			sharedSchema.FatherAgeSelection,
 // 		},
 // 	}
 
 // 	defer close(sheetChan)
 
 // 	grpRows := make(sharedSchema.GroupingRows)
-// 	for resArr := range summaryColumns(bqDatesMap, mnth, yr, qp, sheetColumns, wks) {
+// 	for resArr := range rwwColumns(qp, sheetColumns) {
 // 		schema := resArr.(executeOutput).schema
-// 		for _, res := range resArr.(executeOutput).result {
-// 			if len(res) > 0 {
-// 				addToRows(revGrpRows, res, schema, totalRowName)
-// 			}
+// 		res := resArr.(executeOutput).result
+// 		// fmt.Printf("%#v", res)
+// 		if len(res) > 0 {
+// 			addToRows(grpRows, schema, res, totalRowName)
 // 		}
 // 	}
 
 // 	sheetChan <- sharedSchema.GenerateSheet(
 // 		sharedUtils.RaceWiseWeight,
-// 		revGrpRows,
-// 		rwwSuperHeaders(len(wks)),
-// 		rwwSubHeaders(wks, int(mnth), int(yr)),
+// 		grpRows,
+// 		rwwSuperHeaders(),
+// 		rwwSubHeaders(),
 // 		string(sharedUtils.RaceWiseWeight),
 // 	)
 // }
 
-// func rwwColumns(bqDatesMap disneycalendar.BQDatesMap, mnth utils.Month, yr utils.Year, qp sharedSchema.QueryParameter, sheetColumns sharedSchema.ColumnFetcher, wks []int) <-chan interface{} {
+// func rwwColumns(qp sharedSchema.QueryParameter, sheetColumns sharedSchema.ColumnFetcher) <-chan interface{} {
 // 	executors := []colDataCollector{}
 // 	for col, fetcher := range sheetColumns {
 // 		qp.Fetcher = fetcher
-// 		executors = append(executors, colDataCollector{col, bqDatesMap, mnth, yr, qp, wks})
+// 		executors = append(executors, colDataCollector{col, qp})
 // 	}
 // 	return parallel.Run(executors)
 // }
 
-// func addToRows(grpRows sharedSchema.GroupingRows, res sharedSchema.RevenueEntries, attr sharedSchema.RevenueEntryAttribute, totalRowName string) {
-// 	divideBy := sharedSchema.GetDivideBy()
+// func addToRows(grpRows sharedSchema.GroupingRows, attr sharedSchema.EntryAttribute, res sharedSchema.Entries, totalRowName string) {
 // 	grpRows.Grouping(
 // 		res,
 // 		attr,
 // 		[]sharedUtils.ColumnRowValue{
-// 			{Column: sharedUtils.ChannelName, RowValue: totalRowName},
-// 			{Column: sharedUtils.RegionColumn},
+// 			{Column: sharedUtils.RaceColumn, RowValue: totalRowName},
+// 			{Column: sharedUtils.FatherAgeColumn},
 // 		},
 // 		sharedSchema.Row{},
 // 		"transpose2",
-// 		divideBy,
+// 		sharedSchema.GetDivideBy(),
 // 	)
-// 	grpRows.Grouping(
-// 		res,
-// 		attr,
-// 		[]sharedUtils.ColumnRowValue{
-// 			{Column: sharedUtils.NoneColumn, RowValue: "", Row: sharedSchema.Row{sharedUtils.RegionColumn: sharedUtils.Total}},
-// 			{Column: sharedUtils.NoneColumn},
-// 		},
-// 		sharedSchema.Row{},
-// 		"transpose2",
-// 		divideBy,
-// 	)
+// 	// grpRows.Grouping(
+// 	// 	res,
+// 	// 	attr,
+// 	// 	[]sharedUtils.ColumnRowValue{
+// 	// 		{Column: sharedUtils.NoneColumn, RowValue: "", Row: sharedSchema.Row{sharedUtils.RaceColumn: sharedUtils.Average}},
+// 	// 		{Column: sharedUtils.NoneColumn},
+// 	// 	},
+// 	// 	sharedSchema.Row{},
+// 	// 	"transpose2",
+// 	// 	sharedSchema.GetDivideBy(),
+// 	// )
 // }
 
-// func rwwSuperHeaders(numberOfWeeks int) []utils.SuperHeader {
-// 	totalColum := 1
-// 	pos := 8
-// 	arr := []utils.SuperHeader{
-// 		{Name: "Revenue", Position: utils.GetPosition(pos), RepeatFor: utils.PositionIncr(&pos, (numberOfWeeks + totalColum))},
-// 		{Name: "ASR", Position: utils.GetPosition(pos), RepeatFor: utils.PositionIncr(&pos, (numberOfWeeks + totalColum))},
-// 	}
+// func rwwSuperHeaders() []utils.SuperHeader {
+// 	arr := []utils.SuperHeader{}
 // 	return arr
 // }
 
-// func rwwSubHeaders(wks []int, mnth, yr int) sharedSchema.SubHeaders {
+// func rwwSubHeaders() sharedSchema.SubHeaders {
 
 // 	cols := sharedSchema.SubHeaders{
-// 		{Column: sharedUtils.ChannelName, Header: "Race", Group: sharedUtils.Group1},
-// 		{Column: sharedUtils.RegionColumn, Header: "Average Weight", Group: sharedUtils.Group1},
+// 		{Column: sharedUtils.RaceColumn, Header: "Race", Group: sharedUtils.Group1},
+// 		{Column: sharedUtils.FatherAgeColumn, Header: "Father's Age", Group: sharedUtils.Group1},
+// 		{Column: sharedUtils.AvgWeightolumn, Header: "Average Weight", Group: sharedUtils.Group1},
 // 	}
 // 	return cols
 // }

@@ -3,7 +3,6 @@ package querybuilder
 import (
 	"strings"
 
-	"example.com/emailreports/app"
 	"example.com/emailreports/reports/shared/schema"
 	"example.com/emailreports/utils"
 )
@@ -15,23 +14,15 @@ var columnMapping = map[string]string{
 	"mother_age":    "mother_age",
 }
 
-// FilterWeightQuery returns Weight using provided filters
-func FilterWeightQuery(qp schema.QueryParameter) string {
-	selectClause, groupingClause := selectionGroupingClause(qp, qp.Selections)
-	return `-- ` + qp.Name + ` --
-		` + selectClause + `
-		` + groupingClause
-}
-
-// =================================================
-// ========= Selection and Grouping Clause =========
-// =================================================
-
-func selectionGroupingClause(qp schema.QueryParameter, selections schema.Selections) (string, string) {
+// GetQuery reurns bq query
+func GetQuery(qp schema.QueryParameter, selections schema.Selections, fromTable string) string {
 	selectClause := "SELECT\n"
 	grouping := "GROUP BY\n"
 
-	selectClause += " avg(weight_pounds) as weight_pounds"
+	switch qp.Type {
+	case schema.WeightQueryType:
+		selectClause += " avg(weight_pounds) as weight_pounds"
+	}
 
 	for _, sel := range selections {
 		switch sel {
@@ -46,9 +37,8 @@ func selectionGroupingClause(qp schema.QueryParameter, selections schema.Selecti
 			grouping += "mother_age,"
 		}
 	}
-
-	selectClause += ` FROM` + app.Configs.Table
-	return selectClause, strings.TrimSuffix(grouping, ",")
+	selectClause += ` FROM` + fromTable
+	return selectClause + strings.TrimSuffix(grouping, ",")
 }
 
 // =================================================

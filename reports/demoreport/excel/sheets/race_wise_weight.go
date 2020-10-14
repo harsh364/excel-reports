@@ -43,6 +43,7 @@ func GetRaceWiseWeight(date time.Time, sheetChan chan sharedSchema.Sheet, totalR
 	qp := sharedSchema.QueryParameter{
 		ReportDate:    date,
 		FilterClauses: filters,
+		Type:          sharedSchema.WeightQueryType,
 		Selections: sharedSchema.Selections{
 			sharedSchema.RaceSelection,
 			sharedSchema.FatherAgeSelection,
