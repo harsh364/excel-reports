@@ -2,7 +2,7 @@ package columns
 
 import (
 	"example.com/emailreports/app"
-	"example.com/emailreports/reports/shared/bq/querybuilder"
+	querybuilder "example.com/emailreports/reports/shared/bq"
 	sharedSchema "example.com/emailreports/reports/shared/schema"
 	sharedUtils "example.com/emailreports/reports/shared/utils"
 )
