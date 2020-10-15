@@ -10,6 +10,10 @@ import (
 	excelreports "example.com/emailreports"
 )
 
+var reportList = []string{
+	"Race Wise",
+}
+
 func main() {
 	args := os.Args[1:]
 	fmt.Println()
@@ -17,6 +21,12 @@ func main() {
 	// args := flag.String("run", "Race Wise", "Runs the provided report")
 	// flag.Parse()
 	// runReport(*args)
+}
+
+var commands = map[string]cmd{
+	"-run":  cmd{desc: "Runs the provided report", usage: "-run \"report name\"", command: "-run"},
+	"-list": cmd{desc: "Lists all the available reports", usage: "-list", command: "list"},
+	"-help": cmd{desc: "Lists all the commands available with description", usage: "-help", command: "-help"},
 }
 
 func runReport(report string) {
@@ -51,12 +61,6 @@ type cmd struct {
 	command string
 }
 
-var commands = map[string]cmd{
-	"-run":  cmd{desc: "Runs the provided report", usage: "-run \"report name\"", command: "-run"},
-	"-list": cmd{desc: "Lists all the available reports", usage: "-list", command: "list"},
-	"-help": cmd{desc: "Lists all the commands available with description", usage: "-help", command: "-help"},
-}
-
 func getHelp() string {
 	help := "Command \t\t Usage \t\t\t\t Description\n\n"
 	for k, v := range commands {
@@ -65,9 +69,11 @@ func getHelp() string {
 	return help
 }
 
+var reportList = []string{"Race Wise"}
+
 func getList() string {
-	list := ""
-	for k := range commands {
+	list := "Report List :\n\n"
+	for _, k := range reportList {
 		list += k + "\n"
 	}
 	return list
