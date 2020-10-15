@@ -69,8 +69,6 @@ func getHelp() string {
 	return help
 }
 
-var reportList = []string{"Race Wise"}
-
 func getList() string {
 	list := "Report List :\n\n"
 	for _, k := range reportList {
