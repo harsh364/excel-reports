@@ -72,37 +72,24 @@ Typically main.go file is very bare. It serves of initilizing excel report gener
 package main
 
 import (
+	"flag"
 	"fmt"
-	"os"
-	"time"
-
-	"example.com/emailreports/reports/shared/utils"
-
-	excelreports "example.com/emailreports"
 )
 
 func main() {
-	args := os.Args[1:]
+	// args := os.Args[1:]
 	fmt.Println()
-	argParser(args)
+	// argParser(args)
+	run := flag.String("run", "", "Runs the provided report")
+	list := flag.Bool("list", false, "Lists all the Reports")
+
+	flag.Parse()
+	if *list {
+		fmt.Println(getList())
+	}
+	runReport(*run)
 }
 
-func argParser(args []string) {
-	switch args[0] {
-	case "-list":
-		fmt.Println(getList())
-	case "-help":
-		fmt.Print(getHelp())
-	case "-run":
-		if len(args) > 1 {
-			runReport(args[1])
-		} else {
-			fmt.Println("No report name provided to run, please provide a report name or use h for help")
-		}
-	default:
-		fmt.Println("No argument Provided, please use -h for help on commands")
-	}
-}
 ```
 ## Report Structure and Code
 
