@@ -319,7 +319,89 @@ func Weight(qp sharedSchema.QueryParameter) sharedSchema.Entries {
 
 ```
 
-Each sheet is made up of multiple columns with there aggregation and/or average or total row added, sheet files contain complete aggregation and generation logic for columns within the sheets along with sheet headers and sub headers. Below is a sample sheet file
+Each sheet is made up of multiple columns with there aggregation and/or average or total row added, sheet files contain complete aggregation and generation logic for columns within the sheets along with sheet headers and sub headers. 
+
+*Column Fetcher* : used to fetch all the columns below is a sample column fetcher
+```go
+// RaceWiseColumnFetchers fetches columns for Race Wise sheet
+var RaceWiseColumnFetchers = sharedSchema.ColumnFetcher{
+	sharedUtils.AvgWeightolumn: sharedSchema.EntriesFetch{},
+}
+```
+
+Every sheet will have its column data collector defined with execute method written on it, below is sample code
+```go
+type colDataCollector struct {
+	col sharedUtils.Column
+	qp  sharedSchema.QueryParameter
+}
+
+type executeOutput struct {
+	result sharedSchema.Entries
+	schema sharedSchema.EntryAttribute
+}
+
+func (e colDataCollector) Execute() interface{} {
+	result := sharedSchema.Entries{}
+	response := executeOutput{}
+	schema := sharedSchema.Weight
+	qp := e.qp
+	switch e.col {
+	case sharedUtils.AvgWeightolumn:
+		result = columns.Weight(qp)
+		response = executeOutput{result: result, schema: schema}
+	}
+	return response
+}
+```
+Each sheet file will have an addToRow function used to convert the entries into excel rows and group them according to the requirement.
+```go
+func addToRows(grpRows sharedSchema.GroupingRows, attr sharedSchema.EntryAttribute, res sharedSchema.Entries, totalRowName string) {
+	grpRows.Grouping(
+		res,
+		attr,
+		[]sharedUtils.ColumnRowValue{
+			{Column: sharedUtils.RaceColumn, RowValue: totalRowName},
+			{Column: sharedUtils.FatherAgeColumn},
+		},
+		sharedSchema.Row{},
+		"transpose2",
+		sharedSchema.GetDivideBy(),
+	)
+	grpRows.Grouping(
+		res,
+		attr,
+		[]sharedUtils.ColumnRowValue{
+			{Column: sharedUtils.NoneColumn, RowValue: "", Row: sharedSchema.Row{sharedUtils.RaceColumn: sharedUtils.Average}},
+			{Column: sharedUtils.NoneColumn},
+		},
+		sharedSchema.Row{},
+		"transpose2",
+		sharedSchema.GetDivideBy(),
+	)
+}
+```
+
+Every sheet will have its super header and sub headers, these can either be shared among the sheets or specific to a sheet, below is an example
+
+```go
+func rwwSuperHeaders() []utils.SuperHeader {
+	arr := []utils.SuperHeader{}
+	return arr
+}
+
+func rwwSubHeaders() sharedSchema.SubHeaders {
+
+	cols := sharedSchema.SubHeaders{
+		{Column: sharedUtils.RaceColumn, Header: "Race", Group: sharedUtils.Group1},
+		{Column: sharedUtils.FatherAgeColumn, Header: "Father's Age", Group: sharedUtils.Group1},
+		{Column: sharedUtils.AvgWeightolumn, Header: "Average Weight", Group: sharedUtils.Group1},
+	}
+	return cols
+}
+```
+Finally all these methods will be used to generate a sheet in the Get function for your sheet.
+Below is a combined sample sheet code
 
 ```go
 package sheets
@@ -448,7 +530,7 @@ func rwwSubHeaders() sharedSchema.SubHeaders {
 
 ### Generator
 
-The generator is used to generate excel report, it generates each sheet parallely and formats the sheets, here is a sample generator code
+The generator is used to generate excel report, it generates each sheet parallely and formats the sheets, the generator contains sheet fetchers and data collectors which are similar to the column data collectors and fetchers, here is a sample generator code
 
 ```go
 package demoreport
