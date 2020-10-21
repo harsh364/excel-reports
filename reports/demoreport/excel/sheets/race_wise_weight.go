@@ -92,17 +92,17 @@ func addToRows(grpRows sharedSchema.GroupingRows, attr sharedSchema.EntryAttribu
 		"transpose2",
 		sharedSchema.GetDivideBy(),
 	)
-	// grpRows.Grouping(
-	// 	res,
-	// 	attr,
-	// 	[]sharedUtils.ColumnRowValue{
-	// 		{Column: sharedUtils.NoneColumn, RowValue: "", Row: sharedSchema.Row{sharedUtils.RaceColumn: sharedUtils.Average}},
-	// 		{Column: sharedUtils.NoneColumn},
-	// 	},
-	// 	sharedSchema.Row{},
-	// 	"transpose2",
-	// 	sharedSchema.GetDivideBy(),
-	// )
+	grpRows.Grouping(
+		res,
+		attr,
+		[]sharedUtils.ColumnRowValue{
+			{Column: sharedUtils.NoneColumn, RowValue: "", Row: sharedSchema.Row{sharedUtils.RaceColumn: sharedUtils.Average}},
+			{Column: sharedUtils.NoneColumn},
+		},
+		sharedSchema.Row{},
+		"transpose2",
+		sharedSchema.GetDivideBy(),
+	)
 }
 
 func rwwSuperHeaders() []utils.SuperHeader {

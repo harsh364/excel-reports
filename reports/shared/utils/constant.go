@@ -11,7 +11,7 @@ type Filter int
 
 const (
 	// Natality filter
-	Natality Filter = iota + 1
+	Natality Filter = 1
 )
 
 // Group is a type for grouping columns

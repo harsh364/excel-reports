@@ -1,7 +1,6 @@
 package demoreport
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -69,8 +68,7 @@ func GetDemoReport(date time.Time, reportName string, sheetFetchers map[sharedUt
 		sheet := sheet.(sharedSchema.Sheet)
 		switch sheet.Name {
 		case sharedUtils.RaceWiseWeight:
-			_, col := formatters.RaceWiseWeightSheet(f, sheet, totalRowName, asOfDisplayDate, "reportName")
-			fmt.Println(col)
+			formatters.RaceWiseWeightSheet(f, sheet, totalRowName, asOfDisplayDate, "reportName")
 			// case sharedUtils.SummaryRevenueDetailed:
 			// 	formatters.SummaryRevenueDetailedSheet(f, sheet, "totalRowName", asOfDisplayDate, "reportName")
 		}
